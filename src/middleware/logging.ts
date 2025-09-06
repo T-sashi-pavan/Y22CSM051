@@ -32,7 +32,7 @@ export class LoggingMiddleware {
 
     this.logs.push(logEntry);
     
-    // Also output to console for development (can be disabled in production)
+    // Output to console for development
     if (process.env.NODE_ENV === 'development') {
       const logMessage = `[${logEntry.timestamp}] ${level.toUpperCase()}: ${message}${packageName ? ` (${packageName})` : ''}`;
       console.log(logMessage);
@@ -66,7 +66,7 @@ export class LoggingMiddleware {
     this.logs = [];
   }
 
-  // Express middleware function
+  // Express middleware function for HTTP request/response logging
   public middleware() {
     return (req: Request, res: Response, next: NextFunction) => {
       const start = Date.now();

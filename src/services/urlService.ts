@@ -21,13 +21,13 @@ export class UrlService {
   public createShortUrl(request: CreateShortUrlRequest, baseUrl: string): { shortLink: string; expiry: string } {
     const { url, validity = 30, shortcode } = request;
 
-    // Validate URL
+    // Validate URL format
     if (!validator.isURL(url, { protocols: ['http', 'https'] })) {
       logger.error(`Invalid URL provided: ${url}`, 'UrlService');
       throw new Error('Invalid URL format');
     }
 
-    // Generate or validate shortcode
+    // Handle shortcode generation or validation
     let finalShortcode: string;
     if (shortcode) {
       if (!this.isValidShortcode(shortcode)) {
@@ -44,11 +44,11 @@ export class UrlService {
       finalShortcode = this.generateUniqueShortcode();
     }
 
-    // Calculate expiry
+    // Calculate expiration time
     const now = new Date();
     const expiresAt = new Date(now.getTime() + validity * 60 * 1000);
 
-    // Create short URL entry
+    // Create URL entry
     const shortUrl: ShortUrl = {
       id: nanoid(),
       shortcode: finalShortcode,
@@ -77,13 +77,13 @@ export class UrlService {
       return null;
     }
 
-    // Check if expired
+    // Check expiration
     if (new Date() > shortUrl.expiresAt) {
       logger.warn(`Expired shortcode accessed: ${shortcode}`, 'UrlService');
       return null;
     }
 
-    // Record click
+    // Record click data
     const clickData: ClickData = {
       timestamp: new Date(),
       referrer,
@@ -91,7 +91,7 @@ export class UrlService {
       ip
     };
 
-    // Add location data if IP is available
+    // Add geolocation if available
     if (ip && ip !== '::1' && ip !== '127.0.0.1') {
       const geo = geoip.lookup(ip);
       if (geo) {
@@ -133,12 +133,12 @@ export class UrlService {
   }
 
   private isValidShortcode(shortcode: string): boolean {
-    // Must be alphanumeric and 3-20 characters
+    // Alphanumeric characters only, 3-20 length
     const regex = /^[a-zA-Z0-9]{3,20}$/;
     return regex.test(shortcode);
   }
 
-  // Cleanup expired URLs (can be called periodically)
+  // Clean up expired URLs periodically
   public cleanupExpiredUrls(): number {
     const now = new Date();
     let cleaned = 0;

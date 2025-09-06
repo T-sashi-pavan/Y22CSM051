@@ -8,7 +8,6 @@ import shortUrlRoutes from './routes/shorturl';
 import redirectRoutes from './routes/redirect';
 import { UrlService } from './services/urlService';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -26,7 +25,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 100, // 100 requests per window
   message: {
     error: 'Too Many Requests',
     message: 'Too many requests from this IP, please try again later.',
@@ -35,11 +34,11 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Body parsing middleware
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Trust proxy (for accurate IP addresses)
+// Trust proxy for accurate IP addresses
 app.set('trust proxy', 1);
 
 // Logging middleware
@@ -58,7 +57,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api', shortUrlRoutes);
 
-// Redirect routes (must be after API routes)
+// Redirect routes
 app.use('/', redirectRoutes);
 
 // 404 handler
